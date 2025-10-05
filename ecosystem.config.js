@@ -2,8 +2,8 @@ module.exports = {
   apps: [{
     name: 'lunar-project',
     script: 'FinishLunar.py',
-    interpreter: 'python3',
-    cwd: '/path/to/your/project/LunarProject',
+    interpreter: 'C:\\LunarProject\\.venv\\Scripts\\python.exe',
+    cwd: 'C:\\LunarProject',
     instances: 1,
     autorestart: true,
     watch: false,

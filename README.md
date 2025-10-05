@@ -1,4 +1,4 @@
-# Thai Lunar Calendar Project
+pip --version# Thai Lunar Calendar Project
 
 This project provides Thai Lunar Calendar functionality with PostgreSQL database integration.
 
