@@ -34,10 +34,54 @@ python FinishLunar.py
 
 ## PM2 Deployment
 
-For server deployment with PM2, use the ecosystem configuration file:
+### Quick Deploy
 
+For Linux/Mac servers:
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
+
+For Windows servers:
+```cmd
+deploy.bat
+```
+
+### Manual PM2 Commands
+
+1. Start the application:
 ```bash
 pm2 start ecosystem.config.js
+```
+
+2. Monitor the application:
+```bash
+pm2 status
+pm2 logs lunar-project
+pm2 monit
+```
+
+3. Restart/Stop the application:
+```bash
+pm2 restart lunar-project
+pm2 stop lunar-project
+```
+
+4. Make PM2 startup on boot:
+```bash
+pm2 startup
+pm2 save
+```
+
+### Using npm scripts
+
+You can also use the predefined npm scripts:
+```bash
+npm run pm2:start    # Start with PM2
+npm run pm2:stop     # Stop PM2 process
+npm run pm2:restart  # Restart PM2 process
+npm run pm2:logs     # View logs
+npm run pm2:monit    # Monitor processes
 ```
 
 ## Database Configuration
