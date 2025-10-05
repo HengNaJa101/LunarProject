@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำนวณจันทรคติไทย</title>
+    <style>
+        body {
+            font-family: 'Sarabun', Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 4px solid #007bff;
+        }
+        .error {
+            color: red;
+            border-left-color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌙 ระบบคำนวณจันทรคติไทย</h1>
+        
+        <form id="lunarForm">
+            <div class="form-group">
+                <label for="day">วันที่เกิด (1-31):</label>
+                <input type="number" id="day" min="1" max="31" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="month">เดือนเกิด (1-12):</label>
+                <select id="month" required>
+                    <option value="">เลือกเดือน</option>
+                    <option value="1">มกราคม</option>
+                    <option value="2">กุมภาพันธ์</option>
+                    <option value="3">มีนาคม</option>
+                    <option value="4">เมษายน</option>
+                    <option value="5">พฤษภาคม</option>
+                    <option value="6">มิถุนายน</option>
+                    <option value="7">กรกฎาคม</option>
+                    <option value="8">สิงหาคม</option>
+                    <option value="9">กันยายน</option>
+                    <option value="10">ตุลาคม</option>
+                    <option value="11">พฤศจิกายน</option>
+                    <option value="12">ธันวาคม</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="year">ปีเกิด พ.ศ.:</label>
+                <input type="number" id="year" min="2400" max="2600" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="pregnancy">อายุครรภ์:</label>
+                <select id="pregnancy" required>
+                    <option value="9">9 เดือน (คลอดปกติ)</option>
+                    <option value="8">8 เดือน (ผ่าคลอด)</option>
+                    <option value="7">7 เดือน (ผ่าคลอด)</option>
+                    <option value="0">จำไม่ได้</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="timeperiod">ช่วงเวลาเกิด:</label>
+                <select id="timeperiod" required>
+                    <option value="กลางวัน">กลางวัน (00:00-18:00 น.)</option>
+                    <option value="กลางคืน">กลางคืน (18:00-24:00 น.)</option>
+                </select>
+            </div>
+            
+            <button type="submit">คำนวณจันทรคติ</button>
+        </form>
+        
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('lunarForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                birth_day: parseInt(document.getElementById('day').value),
+                birth_month: parseInt(document.getElementById('month').value),
+                birth_year: parseInt(document.getElementById('year').value),
+                pregnancy_months: parseInt(document.getElementById('pregnancy').value),
+                time_period: document.getElementById('timeperiod').value
+            };
+            
+            try {
+                const response = await fetch('/lunar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const data = await response.json();
+                const resultDiv = document.getElementById('result');
+                
+                if (data.success) {
+                    resultDiv.innerHTML = `<pre>${data.result}</pre>`;
+                    resultDiv.className = 'result';
+                } else {
+                    resultDiv.innerHTML = `<strong>เกิดข้อผิดพลาด:</strong> ${data.error}`;
+                    resultDiv.className = 'result error';
+                }
+                
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = `<strong>เกิดข้อผิดพลาด:</strong> ${error.message}`;
+                resultDiv.className = 'result error';
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
