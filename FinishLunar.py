@@ -2,6 +2,32 @@ import psycopg2
 from datetime import datetime
 import os
 import sys
+import signal
+import time
+import logging
+
+# ตั้งค่า logging สำหรับ PM2
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.StreamHandler(sys.stdout)
+    ]
+)
+logger = logging.getLogger(__name__)
+
+# ตัวแปรสำหรับควบคุมการทำงาน
+running = True
+
+def signal_handler(signum, frame):
+    """จัดการ signal สำหรับการหยุดทำงานอย่างสุภาพ"""
+    global running
+    logger.info(f"Received signal {signum}, shutting down gracefully...")
+    running = False
+
+# ลงทะเบียน signal handlers
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 # ข้อมูลการเชื่อมต่อฐานข้อมูล
 DB_CONFIG = {
@@ -696,17 +722,70 @@ def check_psycopg2_installation():
     print("="*50)
     return True
 
-if __name__ == "__main__":
-    # แสดงตำแหน่งไฟล์เมื่อรันโปรแกรม
-    print(f"ไฟล์โปรแกรม: {os.path.abspath(__file__)}")
-    print(f"โฟลเดอร์ทำงาน: {os.getcwd()}")
+def run_service():
+    """ฟังก์ชันหลักสำหรับรันเป็น service ด้วย PM2"""
+    global running
     
-    # ตรวจสอบเวอร์ชัน Python
-    check_python_version()
+    logger.info("=== Thai Lunar Calendar Service Started ===")
+    logger.info("Service is running in PM2 mode...")
+    
+    # ทดสอบการเชื่อมต่อฐานข้อมูลตอนเริ่มต้น
+    if not test_database_connection():
+        logger.error("Failed to connect to database. Service will exit.")
+        return False
     
     # ตรวจสอบการติดตั้ง psycopg2
     if not check_psycopg2_installation():
-        print("มีปัญหาการติดตั้ง psycopg2 กรุณาตรวจสอบ")
+        logger.error("psycopg2 installation check failed. Service will exit.")
+        return False
+    
+    logger.info("All checks passed. Service is ready.")
+    
+    # Main service loop
+    while running:
+        try:
+            # ทำงานบางอย่างหรือรอ
+            time.sleep(10)  # รอ 10 วินาที
+            
+            # ทดสอบการเชื่อมต่อฐานข้อมูลเป็นระยะ (ทุก 5 นาที)
+            if int(time.time()) % 300 == 0:  # ทุก 5 นาที
+                logger.info("Periodic database connection check...")
+                test_database_connection()
+                
+        except Exception as e:
+            logger.error(f"Error in service loop: {e}")
+            time.sleep(5)  # รอ 5 วินาทีก่อนลองใหม่
+    
+    logger.info("Service stopped gracefully.")
+    return True
+
+def is_pm2_mode():
+    """ตรวจสอบว่าถูกรันด้วย PM2 หรือไม่"""
+    return 'PM2_HOME' in os.environ or len(sys.argv) > 1 and '--pm2' in sys.argv
+
+if __name__ == "__main__":
+    # ตรวจสอบว่าถูกรันด้วย PM2 หรือไม่
+    if is_pm2_mode():
+        # รันเป็น service สำหรับ PM2
+        logger.info("Starting in PM2 service mode...")
+        try:
+            success = run_service()
+            sys.exit(0 if success else 1)
+        except Exception as e:
+            logger.error(f"Service failed: {e}")
+            sys.exit(1)
+    else:
+        # รันแบบ interactive mode
+        # แสดงตำแหน่งไฟล์เมื่อรันโปรแกรม
+        print(f"ไฟล์โปรแกรม: {os.path.abspath(__file__)}")
+        print(f"โฟลเดอร์ทำงาน: {os.getcwd()}")
+        
+        # ตรวจสอบเวอร์ชัน Python
+        check_python_version()
+        
+        # ตรวจสอบการติดตั้ง psycopg2
+        if not check_psycopg2_installation():
+            print("มีปัญหาการติดตั้ง psycopg2 กรุณาตรวจสอบ")
         input("กด Enter เพื่อปิดโปรแกรม...")
         exit()
     
@@ -801,3 +880,45 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"เกิดข้อผิดพลาด: {e}")
         input("กด Enter เพื่อปิดโปรแกรม...")
+
+def run_service():
+    """ฟังก์ชันหลักสำหรับรันเป็น service ด้วย PM2"""
+    global running
+    
+    logger.info("=== Thai Lunar Calendar Service Started ===")
+    logger.info("Service is running in PM2 mode...")
+    
+    # ทดสอบการเชื่อมต่อฐานข้อมูลตอนเริ่มต้น
+    if not test_database_connection():
+        logger.error("Failed to connect to database. Service will exit.")
+        return False
+    
+    # ตรวจสอบการติดตั้ง psycopg2
+    if not check_psycopg2_installation():
+        logger.error("psycopg2 installation check failed. Service will exit.")
+        return False
+    
+    logger.info("All checks passed. Service is ready.")
+    
+    # Main service loop
+    while running:
+        try:
+            # ทำงานบางอย่างหรือรอ
+            time.sleep(10)  # รอ 10 วินาที
+            
+            # ทดสอบการเชื่อมต่อฐานข้อมูลเป็นระยะ (ทุก 5 นาที)
+            if int(time.time()) % 300 == 0:  # ทุก 5 นาที
+                logger.info("Periodic database connection check...")
+                test_database_connection()
+                
+        except Exception as e:
+            logger.error(f"Error in service loop: {e}")
+            time.sleep(5)  # รอ 5 วินาทีก่อนลองใหม่
+    
+    logger.info("Service stopped gracefully.")
+    return True
+
+# เช็คว่าถูกรันด้วย PM2 หรือไม่
+def is_pm2_mode():
+    """ตรวจสอบว่าถูกรันด้วย PM2 หรือไม่"""
+    return 'PM2_HOME' in os.environ or len(sys.argv) > 1 and '--pm2' in sys.argv
