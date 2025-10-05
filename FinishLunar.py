@@ -28,30 +28,30 @@ def test_database_connection():
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
         
-        print("✓ เชื่อมต่อฐานข้อมูลสำเร็จ!")
+        print("[OK] เชื่อมต่อฐานข้อมูลสำเร็จ!")
         
         # ทดสอบ query ง่ายๆ
         cursor.execute("SELECT version();")
         version = cursor.fetchone()
-        print(f"✓ PostgreSQL Version: {version[0]}")
+        print(f"[OK] PostgreSQL Version: {version[0]}")
         
         # ตรวจสอบตาราง
         cursor.execute("SELECT COUNT(*) FROM thai_lunar_calendar;")
         count = cursor.fetchone()
-        print(f"✓ จำนวนข้อมูลในตาราง thai_lunar_calendar: {count[0]} แถว")
+        print(f"[OK] จำนวนข้อมูลในตาราง thai_lunar_calendar: {count[0]} แถว")
         
         conn.close()
-        print("✓ ปิดการเชื่อมต่อเรียบร้อย")
+        print("[OK] ปิดการเชื่อมต่อเรียบร้อย")
         return True
         
     except psycopg2.OperationalError as e:
-        print(f"✗ ข้อผิดพลาดการเชื่อมต่อ: {e}")
+        print(f"[ERROR] ข้อผิดพลาดการเชื่อมต่อ: {e}")
         return False
     except psycopg2.Error as e:
-        print(f"✗ ข้อผิดพลาด PostgreSQL: {e}")
+        print(f"[ERROR] ข้อผิดพลาด PostgreSQL: {e}")
         return False
     except Exception as e:
-        print(f"✗ ข้อผิดพลาดทั่วไป: {e}")
+        print(f"[ERROR] ข้อผิดพลาดทั่วไป: {e}")
         return False
 
 def convert_thai_lunar_month_to_number(เดือนจันทรคติ_ชื่อ):
@@ -687,12 +687,12 @@ def check_psycopg2_installation():
         conn_test = psycopg2.connect("host=localhost user=test")  # จำลองการเชื่อมต่อ
     except psycopg2.OperationalError:
         # คาดหวังว่าจะเกิด error เพราะไม่มี host=localhost 
-        print("✓ psycopg2 สามารถสร้าง connection object ได้")
+        print("[OK] psycopg2 สามารถสร้าง connection object ได้")
     except Exception as e:
-        print(f"✗ ปัญหาการติดตั้ง psycopg2: {e}")
+        print(f"[ERROR] ปัญหาการติดตั้ง psycopg2: {e}")
         return False
     
-    print("✓ psycopg2 ติดตั้งและทำงานได้ปกติ")
+    print("[OK] psycopg2 ติดตั้งและทำงานได้ปกติ")
     print("="*50)
     return True
 
