@@ -16,7 +16,10 @@ module.exports = {
       NODE_ENV: 'production',
       PM2_HOME: process.env.PM2_HOME || require('os').homedir() + '/.pm2',
       PYTHONUNBUFFERED: '1',
-      PYTHONIOENCODING: 'utf-8'
+      PYTHONIOENCODING: 'utf-8',
+      PYTHONUTF8: '1',
+      LANG: 'en_US.UTF-8',
+      LC_ALL: 'en_US.UTF-8'
     },
     error_file: './logs/err.log',
     out_file: './logs/out.log',

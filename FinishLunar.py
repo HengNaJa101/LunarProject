@@ -6,6 +6,14 @@ import signal
 import time
 import logging
 
+# ตั้งค่า encoding สำหรับ Windows
+if sys.platform.startswith('win'):
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    # ตั้งค่า console encoding
+    os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
+
 # ตั้งค่า logging สำหรับ PM2
 logging.basicConfig(
     level=logging.INFO,
