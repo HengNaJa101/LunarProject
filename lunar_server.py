@@ -84,7 +84,9 @@ class LunarCalendarServer:
             # ส่งข้อความต้อนรับ
             welcome_msg = {
                 "status": "connected",
-                "message": "🌙 ยินดีต้อนรับสู่ Thai Lunar Calendar Server",
+                "message": "🌙 Welcome to Thai Lunar Calendar Server",
+                "server_url": "postgresql://thaiHub:password@localhost:5433/thai-hub-local",
+                "web_interface": "https://www.postgresql.org/download/windows/",
                 "instructions": {
                     "format": "JSON",
                     "required_fields": ["birth_year", "birth_month", "birth_day"],
@@ -94,7 +96,7 @@ class LunarCalendarServer:
                         "birth_month": 5,
                         "birth_day": 15,
                         "pregnancy_months": 9,
-                        "time_period": "กลางวัน"
+                        "time_period": "day"
                     }
                 }
             }
@@ -109,7 +111,7 @@ class LunarCalendarServer:
                     break
                     
                 if data.lower() in ['exit', 'quit', 'bye']:
-                    goodbye_msg = {"status": "disconnected", "message": "👋 ขอบคุณที่ใช้บริการ"}
+                    goodbye_msg = {"status": "disconnected", "message": "👋 Thank you for using our service"}
                     self.send_response(client_socket, goodbye_msg)
                     break
                     
@@ -150,13 +152,13 @@ class LunarCalendarServer:
             
             # ตรวจสอบความถูกต้องของข้อมูล
             if not (1 <= birth_month <= 12):
-                return {"status": "error", "message": "เดือนต้องอยู่ระหว่าง 1-12"}
+                return {"status": "error", "message": "Month must be between 1-12"}
                 
             if not (1 <= birth_day <= 31):
-                return {"status": "error", "message": "วันต้องอยู่ระหว่าง 1-31"}
+                return {"status": "error", "message": "Day must be between 1-31"}
                 
             if not (2400 <= birth_year <= 2600):
-                return {"status": "error", "message": "ปีต้องอยู่ระหว่าง 2400-2600"}
+                return {"status": "error", "message": "Year must be between 2400-2600"}
             
             # คำนวณข้อมูลจันทรคติ
             print(f"📊 Calculating: {birth_day}/{birth_month}/{birth_year}")
@@ -179,21 +181,21 @@ class LunarCalendarServer:
         except json.JSONDecodeError:
             return {
                 "status": "error",
-                "message": "รูปแบบ JSON ไม่ถูกต้อง",
+                "message": "Invalid JSON format",
                 "example": {
                     "birth_year": 2520,
                     "birth_month": 5,
                     "birth_day": 15,
                     "pregnancy_months": 9,
-                    "time_period": "กลางวัน"
+                    "time_period": "day"
                 }
             }
             
         except ValueError as e:
-            return {"status": "error", "message": f"ข้อมูลไม่ถูกต้อง: {str(e)}"}
+            return {"status": "error", "message": f"Invalid data: {str(e)}"}
             
         except Exception as e:
-            return {"status": "error", "message": f"เกิดข้อผิดพลาด: {str(e)}"}
+            return {"status": "error", "message": f"Error occurred: {str(e)}"}
     
     def send_response(self, client_socket, response):
         """ส่งข้อมูลกลับไปยัง client"""
@@ -201,7 +203,7 @@ class LunarCalendarServer:
             response_json = json.dumps(response, ensure_ascii=False, indent=2)
             client_socket.send((response_json + "\n").encode('utf-8'))
         except Exception as e:
-            print(f"❌ ไม่สามารถส่งข้อมูลได้: {e}")
+            print(f"❌ Cannot send data: {e}")
     
     def stop_server(self):
         """หยุด server"""
