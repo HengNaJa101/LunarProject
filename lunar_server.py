@@ -37,30 +37,30 @@ class LunarCalendarServer:
             self.server_socket.listen(5)
             self.running = True
             
-            print(f"🌙 Thai Lunar Calendar Server เริ่มทำงานแล้ว")
+            print(f"🌙 Thai Lunar Calendar Server Started")
             print(f"📡 Host: {self.host}")
             print(f"🔌 Port: {self.port}")
             print(f"🌐 URL: http://{self.host}:{self.port}")
-            print(f"⏰ เวลา: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+            print(f"⏰ Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
             print("-" * 60)
-            print("📝 วิธีการใช้งาน:")
-            print("   - เชื่อมต่อผ่าน telnet หรือ netcat")
-            print("   - ส่งข้อมูล JSON format")
-            print("   - กด Ctrl+C เพื่อหยุด server")
+            print("📝 How to use:")
+            print("   - Connect via telnet or netcat")
+            print("   - Send JSON format data")
+            print("   - Press Ctrl+C to stop server")
             print("-" * 60)
             
             # ทดสอบการเชื่อมต่อฐานข้อมูล
             if test_database_connection():
-                print("✅ เชื่อมต่อฐานข้อมูลสำเร็จ")
+                print("✅ Database connection successful")
             else:
-                print("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+                print("❌ Cannot connect to database")
                 
-            print("\n🎯 รอการเชื่อมต่อจากลูกค้า...")
+            print("\n🎯 Waiting for client connections...")
             
             while self.running:
                 try:
                     client_socket, client_address = self.server_socket.accept()
-                    print(f"\n📞 มีการเชื่อมต่อจาก: {client_address}")
+                    print(f"\n📞 Connection from: {client_address}")
                     
                     # สร้าง thread สำหรับจัดการ client แต่ละตัว
                     client_thread = threading.Thread(
@@ -123,7 +123,7 @@ class LunarCalendarServer:
             
         finally:
             client_socket.close()
-            print(f"📴 ปิดการเชื่อมต่อกับ: {client_address}")
+            print(f"📴 Connection closed: {client_address}")
             
     def process_request(self, data):
         """ประมวลผล request จาก client"""
@@ -159,7 +159,7 @@ class LunarCalendarServer:
                 return {"status": "error", "message": "ปีต้องอยู่ระหว่าง 2400-2600"}
             
             # คำนวณข้อมูลจันทรคติ
-            print(f"📊 กำลังคำนวณ: {birth_day}/{birth_month}/{birth_year}")
+            print(f"📊 Calculating: {birth_day}/{birth_month}/{birth_year}")
             result = calculate_thai_lunar_calendar(
                 birth_year, birth_month, birth_day, 
                 pregnancy_months, time_period
@@ -208,7 +208,7 @@ class LunarCalendarServer:
         self.running = False
         if self.server_socket:
             self.server_socket.close()
-        print("\n🛑 Server หยุดทำงานแล้ว")
+        print("\n🛑 Server stopped")
 
 def main():
     """ฟังก์ชันหลัก"""
@@ -223,14 +223,14 @@ def main():
         server.start_server()
         
     except KeyboardInterrupt:
-        print("\n\n⏹️  ได้รับสัญญาณหยุด (Ctrl+C)")
+        print("\n\n⏹️  Stop signal received (Ctrl+C)")
         server.stop_server()
         
     except Exception as e:
-        print(f"❌ ข้อผิดพลาดที่ไม่คาดคิด: {e}")
+        print(f"❌ Unexpected error: {e}")
         
     finally:
-        print("👋 ขอบคุณที่ใช้บริการ")
+        print("👋 Thank you for using our service")
 
 if __name__ == "__main__":
     main()
