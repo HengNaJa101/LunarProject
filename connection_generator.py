@@ -16,9 +16,9 @@ class ConnectionURLGenerator:
             'local': {
                 'host': 'localhost',
                 'port': 5432,
-                'database': 'thai-hub-local',
-                'username': 'thaiHub',
-                'password': 'your_password_here'
+                'database': 'thai_lunar_db',
+                'username': 'postgres',
+                'password': 'postgres'
             },
             'remote': {
                 'host': 'Chainchinjung.3bbddns.com',

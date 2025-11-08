@@ -7,9 +7,9 @@ import psycopg2
 LOCAL_DB_CONFIG = {
     'host': 'localhost',
     'port': 5432,  # Port ปกติของ PostgreSQL
-    'database': 'thai-hub-local',
-    'user': 'thaiHub',
-    'password': 'your_password_here'  # เปลี่ยนเป็นรหัสผ่านจริง
+    'database': 'thai_lunar_db',  # Database ใหม่ที่สร้างขึ้น
+    'user': 'postgres',      # ใช้ user postgres (default)
+    'password': 'postgres'   # รหัสผ่าน postgres
 }
 
 # ข้อมูลการเชื่อมต่อ Remote Database (เดิม)

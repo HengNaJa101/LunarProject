@@ -37,13 +37,13 @@ def signal_handler(signum, frame):
 signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
-# ข้อมูลการเชื่อมต่อฐานข้อมูล
+# ข้อมูลการเชื่อมต่อฐานข้อมูล - Local PostgreSQL
 DB_CONFIG = {
-    'host': 'Chainchinjung.3bbddns.com',
-    'port': 57721,
-    'database': 'thai-hub',
-    'user': 'thaiHub',
-    'password': 'thaiHubPassword'
+    'host': 'localhost',
+    'port': 5432,
+    'database': 'thai_lunar_db',
+    'user': 'postgres',
+    'password': 'postgres'
 }
 
 def test_database_connection():
