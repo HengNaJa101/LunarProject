@@ -2,8 +2,8 @@ module.exports = {
   apps: [{
     name: 'lunar-server-5433',
     script: 'lunar_server.py',
-    interpreter: 'C:\\Users\\Administrator\\LunarProject\\.venv\\Scripts\\python.exe',
-    cwd: 'C:\\Users\\Administrator\\LunarProject',
+    interpreter: 'C:\LunarProjectNew\\.venv\\Scripts\\python.exe',
+    cwd: 'C:\LunarProjectNew',
     instances: 1,
     autorestart: true,
     watch: false,

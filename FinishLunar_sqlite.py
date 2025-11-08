@@ -1,0 +1,259 @@
+# -*- coding: utf-8 -*-
+"""
+FinishLunar.py - Modified for SQLite Database
+แก้ไขให้ใช้ SQLite แทน PostgreSQL
+"""
+
+import sqlite3
+import os
+import sys
+from datetime import datetime
+import signal
+import time
+import logging
+
+# ตั้งค่า encoding สำหรับ Windows
+if sys.platform.startswith('win'):
+    import codecs
+    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    os.environ.setdefault('PYTHONIOENCODING', 'utf-8')
+
+# ตั้งค่า logging สำหรับ PM2
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
+
+# ตัวแปรสำหรับควบคุมการทำงาน
+running = True
+
+# การตั้งค่า Database - SQLite
+SQLITE_DB_PATH = os.path.join(os.path.dirname(__file__), 'thai_lunar.db')
+
+def signal_handler(signum, frame):
+    """จัดการ signal สำหรับการปิดโปรแกรม"""
+    global running
+    logger.info(f"📨 ได้รับ signal {signum}")
+    logger.info("🔄 กำลังปิดโปรแกรม...")
+    running = False
+
+# ลงทะเบียน signal handlers
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
+
+def get_sqlite_connection():
+    """สร้างการเชื่อมต่อ SQLite"""
+    conn = sqlite3.connect(SQLITE_DB_PATH)
+    conn.row_factory = sqlite3.Row  # ให้ผลลัพธ์เป็น dict-like
+    return conn
+
+def test_database_connection():
+    """ทดสอบการเชื่อมต่อฐานข้อมูล SQLite"""
+    try:
+        logger.info("=== ทดสอบการเชื่อมต่อฐานข้อมูล ===")
+        logger.info(f"Database: {SQLITE_DB_PATH}")
+        logger.info("กำลังเชื่อมต่อ...")
+        
+        # เชื่อมต่อฐานข้อมูล
+        conn = get_sqlite_connection()
+        cursor = conn.cursor()
+        
+        logger.info("[OK] เชื่อมต่อฐานข้อมูลสำเร็จ!")
+        
+        # ทดสอบ query ง่ายๆ
+        cursor.execute("SELECT sqlite_version()")
+        version = cursor.fetchone()[0]
+        logger.info(f"[OK] SQLite Version: {version}")
+        
+        # ตรวจสอบตาราง
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = cursor.fetchall()
+        table_names = [table[0] for table in tables]
+        logger.info(f"[OK] Tables: {table_names}")
+        
+        # ตรวจสอบข้อมูลในตาราง lunar_calendar
+        if 'lunar_calendar' in table_names:
+            cursor.execute("SELECT COUNT(*) FROM lunar_calendar")
+            count = cursor.fetchone()[0]
+            logger.info(f"[OK] มีข้อมูลในตาราง lunar_calendar: {count} รายการ")
+        else:
+            logger.warning("[WARNING] ไม่พบตาราง lunar_calendar")
+        
+        cursor.close()
+        conn.close()
+        logger.info("[OK] ทดสอบฐานข้อมูลสำเร็จ!")
+        return True
+        
+    except Exception as e:
+        logger.error(f"[ERROR] การเชื่อมต่อฐานข้อมูลล้มเหลว: {e}")
+        return False
+
+def calculate_lunar_calendar(solar_date):
+    """คำนวณปฏิทินจันทรคติ - ตัวอย่างง่ายๆ"""
+    try:
+        # นี่คือตัวอย่างการคำนวณ - ในความเป็นจริงจะซับซ้อนกว่านี้
+        year = solar_date.year
+        lunar_year = year + 543  # แปลงเป็น พ.ศ.
+        lunar_month = solar_date.month
+        lunar_day = solar_date.day
+        
+        month_names = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ]
+        
+        day_names = ["วันจันทร์", "วันอังคาร", "วันพุธ", "วันพฤหัสบดี", "วันศุกร์", "วันเสาร์", "วันอาทิตย์"]
+        
+        lunar_month_name = month_names[lunar_month - 1] if lunar_month <= 12 else "เดือน" + str(lunar_month)
+        day_name = day_names[solar_date.weekday()]
+        
+        return {
+            'solar_date': solar_date,
+            'lunar_year': lunar_year,
+            'lunar_month': lunar_month,
+            'lunar_day': lunar_day,
+            'lunar_month_name': lunar_month_name,
+            'day_name': day_name,
+            'zodiac_year': 'มะเมีย',  # ตัวอย่าง
+            'zodiac_day': 'กบ',      # ตัวอย่าง
+            'is_leap_month': False
+        }
+        
+    except Exception as e:
+        logger.error(f"[ERROR] การคำนวณปฏิทินจันทรคติล้มเหลว: {e}")
+        return None
+
+def save_lunar_data(lunar_data):
+    """บันทึกข้อมูลปฏิทินจันทรคติลงฐานข้อมูล"""
+    try:
+        conn = get_sqlite_connection()
+        cursor = conn.cursor()
+        
+        # ตรวจสอบว่ามีข้อมูลวันที่นี้แล้วหรือไม่
+        cursor.execute("SELECT id FROM lunar_calendar WHERE solar_date = ?", 
+                      (lunar_data['solar_date'].strftime('%Y-%m-%d'),))
+        
+        if cursor.fetchone():
+            logger.info(f"ข้อมูลวันที่ {lunar_data['solar_date']} มีอยู่แล้ว")
+            return True
+        
+        # บันทึกข้อมูลใหม่
+        cursor.execute("""
+            INSERT INTO lunar_calendar 
+            (solar_date, lunar_year, lunar_month, lunar_day, lunar_month_name,
+             day_name, zodiac_year, zodiac_day, is_leap_month)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            lunar_data['solar_date'].strftime('%Y-%m-%d'),
+            lunar_data['lunar_year'],
+            lunar_data['lunar_month'],
+            lunar_data['lunar_day'],
+            lunar_data['lunar_month_name'],
+            lunar_data['day_name'],
+            lunar_data['zodiac_year'],
+            lunar_data['zodiac_day'],
+            lunar_data['is_leap_month']
+        ))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        logger.info(f"✅ บันทึกข้อมูลวันที่ {lunar_data['solar_date']} สำเร็จ")
+        return True
+        
+    except Exception as e:
+        logger.error(f"[ERROR] การบันทึกข้อมูลล้มเหลว: {e}")
+        return False
+
+def main_lunar_service():
+    """บริการหลักของโปรแกรมปฏิทินจันทรคติ"""
+    global running
+    
+    logger.info("🚀 เริ่มต้นบริการปฏิทินจันทรคติ")
+    logger.info(f"📁 Database: {SQLITE_DB_PATH}")
+    
+    # ทดสอบการเชื่อมต่อฐานข้อมูล
+    if not test_database_connection():
+        logger.error("❌ ไม่สามารถเชื่อมต่อฐานข้อมูลได้")
+        return
+    
+    iteration = 0
+    
+    while running:
+        try:
+            iteration += 1
+            current_time = datetime.now()
+            
+            logger.info(f"🔄 การทำงานครั้งที่ {iteration} - {current_time.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+            # คำนวณปฏิทินจันทรคติสำหรับวันนี้
+            lunar_data = calculate_lunar_calendar(current_time.date())
+            
+            if lunar_data:
+                logger.info(f"📅 ปฏิทินจันทรคติ: {lunar_data['lunar_year']}/{lunar_data['lunar_month']}/{lunar_data['lunar_day']}")
+                logger.info(f"🗓️ วัน: {lunar_data['day_name']} เดือน: {lunar_data['lunar_month_name']}")
+                
+                # บันทึกข้อมูลลงฐานข้อมูล
+                save_lunar_data(lunar_data)
+            
+            # หน่วงเวลา 10 วินาที
+            for i in range(10):
+                if not running:
+                    break
+                time.sleep(1)
+                
+        except Exception as e:
+            logger.error(f"[ERROR] เกิดข้อผิดพลาดในการทำงาน: {e}")
+            time.sleep(5)
+    
+    logger.info("✅ บริการปฏิทินจันทรคติหยุดทำงานแล้ว")
+
+if __name__ == "__main__":
+    try:
+        logger.info("ไฟล์โปรแกรม: " + __file__)
+        logger.info("โฟลเดอร์ทำงาน: " + os.getcwd())
+        
+        # แสดงข้อมูลเวอร์ชัน Python
+        logger.info("=== ข้อมูลเวอร์ชัน Python ===")
+        logger.info(f"Python Version: {sys.version}")
+        logger.info(f"Python Version Info: {sys.version_info}")
+        logger.info(f"Python Executable: {sys.executable}")
+        logger.info("=" * 50)
+        
+        # ตรวจสอบ SQLite
+        logger.info("=== ข้อมูลการติดตั้ง SQLite ===")
+        try:
+            import sqlite3
+            logger.info(f"SQLite Version: {sqlite3.sqlite_version}")
+            logger.info(f"SQLite Module: {sqlite3.__file__}")
+            logger.info("[OK] SQLite พร้อมใช้งาน")
+        except Exception as e:
+            logger.error(f"[ERROR] SQLite ไม่พร้อมใช้งาน: {e}")
+            
+        logger.info("=" * 50)
+        
+        # ตรวจสอบว่าเป็นการรันผ่าน PM2 หรือไม่
+        if len(sys.argv) > 1 and '--pm2' in sys.argv:
+            logger.info("🔄 รันผ่าน PM2 - เริ่มบริการ")
+            main_lunar_service()
+        else:
+            logger.info("💡 รันแบบ manual - กด Enter เพื่อปิดโปรแกรม")
+            
+            # ทดสอบการเชื่อมต่อฐานข้อมูล
+            test_database_connection()
+            
+            # รอให้ผู้ใช้กด Enter
+            try:
+                input("กด Enter เพื่อปิดโปรแกรม...")
+            except KeyboardInterrupt:
+                logger.info("\n🔄 ได้รับ Ctrl+C")
+            except EOFError:
+                logger.info("🔄 ได้รับ EOF")
+                
+    except Exception as e:
+        logger.error(f"[ERROR] เกิดข้อผิดพลาดร้ายแรง: {e}")
+        sys.exit(1)
