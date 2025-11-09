@@ -22,15 +22,7 @@ if sys.platform == 'win32':
         pass  # หากใช้ไม่ได้ ให้ใช้ environment variables
 
 from flask import Flask, jsonify, request
-# รองรับทั้ง psycopg2 และ psycopg (เวอร์ชันใหม่)
-try:
-    import psycopg2
-    import psycopg2.extras
-    PSYCOPG_VERSION = 2
-except ImportError:
-    import psycopg as psycopg2
-    import psycopg.extras as psycopg2_extras
-    PSYCOPG_VERSION = 3
+import psycopg2
 from datetime import datetime, date
 import json
 import logging
@@ -57,14 +49,9 @@ DATABASE_CONFIG = {
 }
 
 def get_database_connection():
-    """เชื่อมต่อกับ PostgreSQL database - รองรับทั้ง psycopg2 และ psycopg3"""
+    """เชื่อมต่อกับ PostgreSQL database"""
     try:
-        if PSYCOPG_VERSION == 2:
-            # psycopg2 (เวอร์ชันเก่า)
-            connection = psycopg2.connect(**DATABASE_CONFIG)
-        else:
-            # psycopg 3 (เวอร์ชันใหม่)
-            connection = psycopg2.connect(**DATABASE_CONFIG, autocommit=True)
+        connection = psycopg2.connect(**DATABASE_CONFIG)
         return connection
     except Exception as error:
         logger.error(f"Database connection failed: {error}")
