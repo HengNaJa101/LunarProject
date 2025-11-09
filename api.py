@@ -27,6 +27,20 @@ from datetime import datetime, date
 import json
 import logging
 
+# Import server configuration
+try:
+    from server_config import get_database_config
+    DATABASE_CONFIG = get_database_config()
+except ImportError:
+    # Fallback configuration ถ้าไม่มีไฟล์ server_config.py
+    DATABASE_CONFIG = {
+        'host': 'YOUR_SERVER_IP',    # เปลี่ยนเป็น IP Address ของ Server
+        'port': 5432,
+        'database': 'thai_lunar_db',
+        'user': 'admin',
+        'password': 'p@ssw0rd'
+    }
+
 app = Flask(__name__)
 
 # ตั้งค่า logging แบบ UTF-8
@@ -39,14 +53,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# การตั้งค่า PostgreSQL สำหรับ Server
-DATABASE_CONFIG = {
-    'host': 'localhost',
-    'port': 5432,
-    'database': 'thai_lunar_db',
-    'user': 'admin',         # ใช้ login user ที่ตั้งค่าไว้
-    'password': 'p@ssw0rd'   # รหัสผ่านที่ตั้งค่าไว้
-}
+# การตั้งค่า PostgreSQL จะถูกโหลดจาก server_config.py แล้ว
+# หรือใช้ fallback configuration ข้างบน
 
 def get_database_connection():
     """เชื่อมต่อกับ PostgreSQL database"""
