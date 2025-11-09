@@ -2,7 +2,7 @@ module.exports = {
   apps: [{
     name: 'thai-lunar-api',
     script: 'api.py',
-    interpreter: 'python3',
+    interpreter: 'python',  // เปลี่ยนจาก python3 เป็น python
     instances: 1,
     autorestart: true,
     watch: false,
