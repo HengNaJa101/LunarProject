@@ -23,8 +23,8 @@ try:
         host='localhost',
         port=5432,
         database='thai_lunar_db',
-        user='postgres',
-        password='your-actual-password'
+        user='admin',
+        password='p@ssw0rd'
     )
     print('✅ PostgreSQL connection successful!')
     conn.close()

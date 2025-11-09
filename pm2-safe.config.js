@@ -1,7 +1,7 @@
 module.exports = {
   apps: [{
-    name: 'thai-lunar-api',
-    script: 'api_safe.py',
+    name: 'thai-lunar-api-safe',
+    script: 'api.py',  // ใช้ไฟล์เดียวกัน แต่ต่าง config
     interpreter: 'python',
     instances: 1,
     autorestart: true,

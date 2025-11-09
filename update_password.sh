@@ -15,10 +15,6 @@ echo "🔧 Updating PostgreSQL password in project files..."
 sed -i "s/'password': 'your-actual-password'/'password': '$NEW_PASSWORD'/g" api.py
 echo "✅ Updated api.py"
 
-# Update api_safe.py  
-sed -i "s/'password': 'your-actual-password'/'password': '$NEW_PASSWORD'/g" api_safe.py
-echo "✅ Updated api_safe.py"
-
 # Update deploy.sh
 sed -i "s/password='your-actual-password'/password='$NEW_PASSWORD'/g" deploy.sh
 echo "✅ Updated deploy.sh"

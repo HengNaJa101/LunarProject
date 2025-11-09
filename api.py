@@ -7,11 +7,19 @@ API สำหรับปฏิทินจันทรคติไทย รอ
 import os
 import sys
 
-# แก้ไขปัญหา encoding ใน Windows
+# แก้ไขปัญหา encoding ใน Windows - ใช้หลายวิธี
 if sys.platform == 'win32':
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    # วิธีที่ 1: Environment variables
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ['PYTHONUNBUFFERED'] = '1'
+    
+    # วิธีที่ 2: Codecs wrapper (สำหรับ Windows Server)
+    try:
+        import codecs
+        sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
+        sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    except Exception:
+        pass  # หากใช้ไม่ได้ ให้ใช้ environment variables
 
 from flask import Flask, jsonify, request
 import psycopg2
@@ -36,8 +44,8 @@ DATABASE_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'thai_lunar_db',
-    'user': 'postgres', 
-    'password': 'P@ssw0rd'  # เปลี่ยนเป็นรหัสผ่านจริงของ PostgreSQL ใน server
+    'user': 'admin',         # ใช้ login user ที่ตั้งค่าไว้
+    'password': 'p@ssw0rd'   # รหัสผ่านที่ตั้งค่าไว้
 }
 
 def get_database_connection():

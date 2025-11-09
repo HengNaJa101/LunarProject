@@ -27,7 +27,7 @@ REM ========================================
 
 echo 🔗 Step 2: Testing PostgreSQL connection
 
-python -c "import psycopg2; conn = psycopg2.connect(host='localhost', port=5432, database='thai_lunar_db', user='postgres', password='123456'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM lunar_calendar'); count = cursor.fetchone()[0]; print(f'✅ PostgreSQL OK - Found {count} records'); cursor.close(); conn.close()" || (echo ❌ PostgreSQL connection failed & exit /b 1)
+python -c "import psycopg2; conn = psycopg2.connect(host='localhost', port=5432, database='thai_lunar_db', user='admin', password='p@ssw0rd'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM lunar_calendar'); count = cursor.fetchone()[0]; print(f'✅ PostgreSQL OK - Found {count} records'); cursor.close(); conn.close()" || (echo ❌ PostgreSQL connection failed & exit /b 1)
 
 REM ========================================
 REM 3. CONFIGURE WINDOWS FIREWALL

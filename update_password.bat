@@ -16,10 +16,6 @@ REM Update api.py
 powershell -Command "(Get-Content api.py) -replace 'your-actual-password', '%NEW_PASSWORD%' | Set-Content api.py"
 echo ✅ Updated api.py
 
-REM Update api_safe.py
-powershell -Command "(Get-Content api_safe.py) -replace 'your-actual-password', '%NEW_PASSWORD%' | Set-Content api_safe.py"
-echo ✅ Updated api_safe.py
-
 REM Update deploy.sh
 powershell -Command "(Get-Content deploy.sh) -replace 'your-actual-password', '%NEW_PASSWORD%' | Set-Content deploy.sh"
 echo ✅ Updated deploy.sh
