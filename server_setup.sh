@@ -54,17 +54,46 @@ except Exception as e:
 "
 
 # ========================================
-# 3. START API WITH PM2
+# 3. CONFIGURE FIREWALL AND PORTS
 # ========================================
 
-echo "🚀 Step 3: Starting API with PM2"
+echo "🔥 Step 3: Configure firewall and open ports"
+
+# เปิดพอร์ต 8000 สำหรับ API (Ubuntu/Debian)
+if command -v ufw >/dev/null 2>&1; then
+    echo "Configuring UFW firewall..."
+    sudo ufw allow 8000/tcp
+    sudo ufw allow ssh
+    sudo ufw --force enable
+    echo "✅ UFW firewall configured"
+elif command -v firewall-cmd >/dev/null 2>&1; then
+    echo "Configuring firewalld..."
+    sudo firewall-cmd --permanent --add-port=8000/tcp
+    sudo firewall-cmd --permanent --add-service=ssh
+    sudo firewall-cmd --reload
+    echo "✅ Firewalld configured"
+else
+    echo "⚠️ No firewall detected or manual configuration needed"
+    echo "Please open port 8000 manually if needed"
+fi
+
+# สร้าง logs directory
+mkdir -p logs
+
+echo "✅ Firewall and ports configured"
+
+# ========================================
+# 4. START API WITH PM2
+# ========================================
+
+echo "🚀 Step 4: Starting API with PM2"
 
 # หยุด process เก่า (ถ้ามี)
 pm2 stop thai-lunar-api 2>/dev/null || true
 pm2 delete thai-lunar-api 2>/dev/null || true
 
 # เริ่ม API ด้วย PM2
-pm2 start ecosystem-api.config.js
+pm2 start ecosystem-api-server.config.js --env production
 
 # บันทึก configuration
 pm2 save

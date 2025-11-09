@@ -30,17 +30,30 @@ echo 🔗 Step 2: Testing PostgreSQL connection
 python -c "import psycopg2; conn = psycopg2.connect(host='localhost', port=5432, database='thai_lunar_db', user='postgres', password='123456'); cursor = conn.cursor(); cursor.execute('SELECT COUNT(*) FROM lunar_calendar'); count = cursor.fetchone()[0]; print(f'✅ PostgreSQL OK - Found {count} records'); cursor.close(); conn.close()" || (echo ❌ PostgreSQL connection failed & exit /b 1)
 
 REM ========================================
-REM 3. START API WITH PM2
+REM 3. CONFIGURE WINDOWS FIREWALL
 REM ========================================
 
-echo 🚀 Step 3: Starting API with PM2
+echo ⚙️ Step 3: Configure Windows Firewall
+
+REM เปิดพอร์ต 8000 สำหรับ API
+netsh advfirewall firewall add rule name="Thai Lunar API Port 8000" dir=in action=allow protocol=TCP localport=8000
+echo ✅ Port 8000 opened in Windows Firewall
+
+REM สร้าง logs directory
+if not exist logs mkdir logs
+
+REM ========================================
+REM 4. START API WITH PM2
+REM ========================================
+
+echo 🚀 Step 4: Starting API with PM2
 
 REM หยุด process เก่า (ถ้ามี)
 pm2 stop thai-lunar-api 2>nul
 pm2 delete thai-lunar-api 2>nul
 
 REM เริ่ม API ด้วย PM2
-pm2 start ecosystem-api.config.js
+pm2 start ecosystem-api-server.config.js --env production
 
 REM บันทึก configuration
 pm2 save

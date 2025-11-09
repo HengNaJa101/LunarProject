@@ -1,50 +1,75 @@
 #!/bin/bash
+# Thai Lunar Calendar API - Server Deployment Script
 
-# Deploy script for LunarProject on server
-echo "🚀 Starting deployment of LunarProject..."
+echo "🌙 Thai Lunar Calendar API - Server Setup"
+echo "========================================"
 
-# Clone or pull latest code
-if [ -d "LunarProject" ]; then
-    echo "📥 Updating existing repository..."
-    cd LunarProject
-    git pull origin main
-else
-    echo "📥 Cloning repository..."
-    git clone https://github.com/HengNaJa101/LunarProject.git
-    cd LunarProject
-fi
+# 1. อัพเดตโค้ดจาก GitHub
+echo "📦 Step 1: Update code from GitHub"
+git pull origin main
+echo "✅ Code updated"
 
-# Create virtual environment if it doesn't exist
-if [ ! -d "venv" ]; then
-    echo "🔧 Creating virtual environment..."
-    python3 -m venv venv
-fi
+# 2. ติดตั้ง Python dependencies
+echo "📦 Step 2: Install Python dependencies"
+pip3 install Flask psycopg2-binary
+echo "✅ Dependencies installed"
 
-# Activate virtual environment and install dependencies
-echo "📦 Installing dependencies..."
-source venv/bin/activate
-pip install -r requirements.txt
+# 3. ทดสอบการเชื่อมต่อฐานข้อมูล
+echo "🔗 Step 3: Test database connection"
+python3 -c "
+import psycopg2
+try:
+    conn = psycopg2.connect(
+        host='localhost',
+        port=5432,
+        database='thai_lunar_db',
+        user='postgres',
+        password='123456'
+    )
+    print('✅ PostgreSQL connection successful!')
+    conn.close()
+except Exception as e:
+    print(f'❌ PostgreSQL connection failed: {e}')
+    exit(1)
+"
 
-# Create logs directory
+# 4. สร้าง logs directory
 mkdir -p logs
 
-# Update ecosystem.config.js with correct path
-echo "⚙️  Updating PM2 configuration..."
-CURRENT_PATH=$(pwd)
-sed -i "s|/path/to/your/project/LunarProject|$CURRENT_PATH|g" ecosystem.config.js
+# 5. ตั้งค่า firewall (Ubuntu/Debian)
+echo "🔥 Step 4: Configure firewall"
+if command -v ufw >/dev/null 2>&1; then
+    sudo ufw allow 8000/tcp
+    sudo ufw --force enable
+    echo "✅ UFW firewall configured for port 8000"
+else
+    echo "⚠️ Please configure firewall manually to allow port 8000"
+fi
 
-# Stop existing PM2 process if running
-echo "🛑 Stopping existing PM2 processes..."
-pm2 stop lunar-project 2>/dev/null || true
-pm2 delete lunar-project 2>/dev/null || true
-
-# Start with PM2
-echo "🔄 Starting application with PM2..."
-pm2 start ecosystem.config.js
-
-# Save PM2 process list
+# 6. รัน API ด้วย PM2
+echo "🚀 Step 5: Deploy API with PM2"
+pm2 stop thai-lunar-api 2>/dev/null || true
+pm2 delete thai-lunar-api 2>/dev/null || true
+pm2 start pm2.config.js --env production
 pm2 save
+echo "✅ API deployed with PM2"
 
-echo "✅ Deployment completed successfully!"
-echo "📊 Check status with: pm2 status"
-echo "📝 Check logs with: pm2 logs lunar-project"
+# 7. แสดงสถานะ
+echo "📊 Step 6: Status check"
+pm2 status
+pm2 logs thai-lunar-api --lines 10
+
+echo ""
+echo "🎉 Deployment Complete!"
+echo ""
+echo "🌐 API Endpoints:"
+echo "   http://localhost:8000/health"
+echo "   http://localhost:8000/usersinfo/get/profile"
+echo "   http://localhost:8000/lunar/today"
+echo "   http://localhost:8000/lunar/date/2025-11-09"
+echo "   http://localhost:8000/lunar/stats"
+echo ""
+echo "🔧 Management Commands:"
+echo "   pm2 status          - ดูสถานะ"
+echo "   pm2 logs thai-lunar-api - ดู logs"
+echo "   pm2 restart thai-lunar-api - รีสตาร์ท"
