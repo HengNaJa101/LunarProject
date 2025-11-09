@@ -24,7 +24,7 @@ try:
         port=5432,
         database='thai_lunar_db',
         user='postgres',
-        password='123456'
+        password='your-actual-password'
     )
     print('✅ PostgreSQL connection successful!')
     conn.close()

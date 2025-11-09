@@ -37,7 +37,7 @@ DATABASE_CONFIG = {
     'port': 5432,
     'database': 'thai_lunar_db',
     'user': 'postgres', 
-    'password': '123456'  # เปลี่ยนตามรหัสผ่านจริงใน server
+    'password': 'P@ssw0rd'  # เปลี่ยนเป็นรหัสผ่านจริงของ PostgreSQL ใน server
 }
 
 def get_database_connection():

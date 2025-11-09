@@ -32,8 +32,8 @@ DATABASE_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'thai_lunar_db',
-    'user': 'postgres', 
-    'password': '123456'
+    'user': 'admin', 
+    'password': 'p@ssw0rd'  # Change to actual PostgreSQL password
 }
 
 def get_database_connection():
