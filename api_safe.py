@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 """
-Thai Lunar Calendar API
-API สำหรับปฏิทินจันทรคติไทย รองรับ PostgreSQL
+Thai Lunar Calendar API - English Version
+Simple API for Thai Lunar Calendar with PostgreSQL
 """
 
 import os
 import sys
 
-# แก้ไขปัญหา encoding ใน Windows
+# Fix Windows encoding issues
 if sys.platform == 'win32':
-    import codecs
-    sys.stdout = codecs.getwriter('utf-8')(sys.stdout.detach())
-    sys.stderr = codecs.getwriter('utf-8')(sys.stderr.detach())
+    os.environ['PYTHONIOENCODING'] = 'utf-8'
+    os.environ['PYTHONUNBUFFERED'] = '1'
 
 from flask import Flask, jsonify, request
 import psycopg2
@@ -21,27 +20,24 @@ import logging
 
 app = Flask(__name__)
 
-# ตั้งค่า logging แบบ UTF-8
+# Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(sys.stdout)
-    ]
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
-# การตั้งค่า PostgreSQL สำหรับ Server
+# PostgreSQL Configuration for Server
 DATABASE_CONFIG = {
     'host': 'localhost',
     'port': 5432,
     'database': 'thai_lunar_db',
     'user': 'postgres', 
-    'password': '123456'  # เปลี่ยนตามรหัสผ่านจริงใน server
+    'password': '123456'
 }
 
 def get_database_connection():
-    """เชื่อมต่อกับ PostgreSQL database"""
+    """Connect to PostgreSQL database"""
     try:
         connection = psycopg2.connect(**DATABASE_CONFIG)
         return connection
@@ -51,9 +47,8 @@ def get_database_connection():
 
 @app.route('/health', methods=['GET'])
 def health_check():
-    """ตรวจสอบสถานะ API และการเชื่อมต่อฐานข้อมูล"""
+    """Check API and database status"""
     try:
-        # ทดสอบการเชื่อมต่อฐานข้อมูล
         conn = get_database_connection()
         if conn:
             cursor = conn.cursor()
@@ -84,9 +79,8 @@ def health_check():
 
 @app.route('/usersinfo/get/profile', methods=['GET'])
 def get_user_profile():
-    """API endpoint ตามรูปที่ต้องการ - ส่งข้อมูล user profile"""
+    """User profile endpoint as per requirements"""
     try:
-        # สร้าง response ตามรูปที่แสดง
         response_data = {
             "id": 21,
             "username": "test1",
@@ -104,7 +98,7 @@ def get_user_profile():
 
 @app.route('/lunar/today', methods=['GET'])
 def get_today_lunar():
-    """ดึงข้อมูลปฏิทินจันทรคติของวันนี้"""
+    """Get today's lunar calendar data"""
     try:
         conn = get_database_connection()
         if not conn:
@@ -112,7 +106,6 @@ def get_today_lunar():
         
         cursor = conn.cursor()
         
-        # ค้นหาข้อมูลวันนี้
         cursor.execute("""
             SELECT solar_date, lunar_year, lunar_month, lunar_day, 
                    lunar_month_name, day_name, zodiac_year, zodiac_day, is_leap_month
@@ -156,9 +149,8 @@ def get_today_lunar():
 
 @app.route('/lunar/date/<date_string>', methods=['GET'])
 def get_lunar_by_date(date_string):
-    """ดึงข้อมูลปฏิทินจันทรคติตามวันที่ (รูปแบบ YYYY-MM-DD)"""
+    """Get lunar calendar data by date (YYYY-MM-DD format)"""
     try:
-        # ตรวจสอบรูปแบบวันที่
         try:
             target_date = datetime.strptime(date_string, '%Y-%m-%d').date()
         except ValueError:
@@ -212,7 +204,7 @@ def get_lunar_by_date(date_string):
 
 @app.route('/lunar/stats', methods=['GET'])
 def get_lunar_stats():
-    """ดึงสถิติข้อมูลในฐานข้อมูล"""
+    """Get database statistics"""
     try:
         conn = get_database_connection()
         if not conn:
@@ -220,11 +212,9 @@ def get_lunar_stats():
         
         cursor = conn.cursor()
         
-        # นับจำนวนข้อมูลทั้งหมด
         cursor.execute("SELECT COUNT(*) FROM lunar_calendar")
         total_records = cursor.fetchone()[0]
         
-        # หาช่วงวันที่
         cursor.execute("SELECT MIN(solar_date), MAX(solar_date) FROM lunar_calendar")
         date_range = cursor.fetchone()
         min_date, max_date = date_range
@@ -248,10 +238,6 @@ def get_lunar_stats():
         return jsonify({"error": str(e)}), 500
 
 if __name__ == '__main__':
-    # ตั้งค่า environment variables สำหรับ UTF-8
-    os.environ['PYTHONIOENCODING'] = 'utf-8'
-    os.environ['PYTHONUNBUFFERED'] = '1'
-    
     print("Thai Lunar Calendar API Starting...")
     print("Available endpoints:")
     print("   GET /health                   - Health check")
@@ -261,5 +247,4 @@ if __name__ == '__main__':
     print("   GET /lunar/stats              - Database statistics")
     print("Server running on: http://0.0.0.0:8000")
     
-    # รัน Flask app
     app.run(host='0.0.0.0', port=8000, debug=False)

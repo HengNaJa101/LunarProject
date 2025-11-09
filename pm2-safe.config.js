@@ -1,27 +1,17 @@
 module.exports = {
   apps: [{
     name: 'thai-lunar-api',
-    script: 'api.py',
+    script: 'api_safe.py',
     interpreter: 'python',
     instances: 1,
     autorestart: true,
     watch: false,
     max_memory_restart: '500M',
-    env: {
-      NODE_ENV: 'development',
-      FLASK_ENV: 'development',
-      PYTHONUNBUFFERED: '1',
-      PYTHONIOENCODING: 'utf-8',
-      LANG: 'en_US.UTF-8',
-      LC_ALL: 'en_US.UTF-8'
-    },
     env_production: {
       NODE_ENV: 'production', 
       FLASK_ENV: 'production',
       PYTHONUNBUFFERED: '1',
-      PYTHONIOENCODING: 'utf-8',
-      LANG: 'en_US.UTF-8',
-      LC_ALL: 'en_US.UTF-8'
+      PYTHONIOENCODING: 'utf-8'
     },
     log_file: './logs/api.log',
     out_file: './logs/api-out.log',
