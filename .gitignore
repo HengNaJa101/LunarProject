@@ -1,24 +1,47 @@
+# Thai Lunar Calendar API - Essential .gitignore
+
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment variables  
+.env
+.env.local
+
+# Database files
+*.db
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# Node modules
+node_modules/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# Flutter cache (keep flutter/ folder but ignore cache)
+flutter/bin/cache/
 MANIFEST
 
 # Virtual environments
