@@ -1,95 +1,63 @@
-pip --versiondir# Thai Lunar Calendar Project
+# 🌙 Thai Lunar Calendar API
 
-This project provides Thai Lunar Calendar functionality with PostgreSQL database integration.
+REST API สำหรับปฏิทินจันทรคติไทย พร้อม PostgreSQL database
 
-## Features
-- Database connection testing
-- Thai lunar calendar data management
-- PostgreSQL integration
+## 🚀 Quick Start
 
-## Requirements
-- Python 3.x
-- PostgreSQL database
-- Dependencies listed in requirements.txt
+### 1. Setup Database
+```sql
+-- รันใน pgAdmin Query Tool
+\i postgresql_setup.sql
+```
 
-## Installation
-
-1. Clone the repository:
+### 2. Deploy API
 ```bash
-git clone https://github.com/HengNaJa101/LunarProject.git
-cd LunarProject
+# Linux/Mac
+./server_setup.sh
+
+# Windows
+server_setup.bat
 ```
 
-2. Install dependencies:
+### 3. Test API
 ```bash
-pip install -r requirements.txt
+./test_api.sh
 ```
 
-3. Configure database settings in `FinishLunar.py` if needed.
+## 📊 API Endpoints
 
-4. Run the application:
+- **Health Check:** `GET /health`
+- **User Profile:** `GET /usersinfo/get/profile`  
+- **Today Data:** `GET /lunar/today`
+- **Date Query:** `GET /lunar/date/YYYY-MM-DD`
+- **Statistics:** `GET /lunar/stats`
+
+## 🛠 Files Structure
+
+### Core Files
+- `thai_lunar_api.py` - Main API application
+- `postgresql_setup.sql` - Database setup script
+- `ecosystem-api.config.js` - PM2 configuration
+
+### Setup Scripts  
+- `server_setup.sh/.bat` - Complete server setup
+- `test_api.sh` - API testing script
+
+### Legacy Files
+- `FinishLunar.py` - Original calculation engine
+- `database_config.py` - Database connection utilities
+
+## 🔧 Management Commands
+
 ```bash
-python FinishLunar.py
+pm2 status                    # ดูสถานะ
+pm2 logs thai-lunar-api       # ดู logs  
+pm2 restart thai-lunar-api    # รีสตาร์ท
+pm2 stop thai-lunar-api       # หยุด
 ```
 
-## PM2 Deployment
+## 📚 Documentation
 
-### Quick Deploy
-
-For Linux/Mac servers:
-```bash
-chmod +x deploy.sh
-./deploy.sh
-```
-
-For Windows servers:
-```cmd
-deploy.bat
-```
-
-### Manual PM2 Commands
-
-1. Start the application:
-```bash
-pm2 start ecosystem.config.js
-```
-
-2. Monitor the application:
-```bash
-pm2 status
-pm2 logs lunar-project
-pm2 monit
-```
-
-3. Restart/Stop the application:
-```bash
-pm2 restart lunar-project
-pm2 stop lunar-project
-```
-
-4. Make PM2 startup on boot:
-```bash
-pm2 startup
-pm2 save
-```
-
-### Using npm scripts
-
-You can also use the predefined npm scripts:
-```bash
-npm run pm2:start    # Start with PM2
-npm run pm2:stop     # Stop PM2 process
-npm run pm2:restart  # Restart PM2 process
-npm run pm2:logs     # View logs
-npm run pm2:monit    # Monitor processes
-```
-
-## Database Configuration
-
-The application connects to a PostgreSQL database with the following default configuration:
-- Host: Chainchinjung.3bbddns.com
-- Port: 57721
-- Database: thai-hub
-- User: thaiHub
-
-Make sure your database is accessible and the table `thai_lunar_calendar` exists.
+- `API_README.md` - API documentation
+- `PM2_COMPLETE_GUIDE.md` - PM2 management guide
+- `SERVER_DEPLOYMENT_COMMANDS.md` - Detailed deployment guide
